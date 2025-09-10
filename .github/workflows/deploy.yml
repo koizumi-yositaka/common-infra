@@ -16,6 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: prod
+    env:
+      AWS_ACCOUNT: 260337063361
+      AWS_REGION: us-east-1
     steps:
       - uses: actions/checkout@v3
 
