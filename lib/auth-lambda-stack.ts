@@ -68,7 +68,8 @@ export class AuthLambdaStack extends cdk.Stack {
       code: lambda.Code.fromAsset(path.join(REPOSITORY_TOP, 'lambdas/mwLogin/dist')),
       role: loginRole,
       environment: {
-        STAGE: props.stage
+        STAGE: props.stage,
+        COGNITO_CLIENT_ID: clientId,
       },
     });
     const mwGetUserLambda = new lambda.Function(this, 'MwGetUserLambda', {
@@ -80,8 +81,7 @@ export class AuthLambdaStack extends cdk.Stack {
       code: lambda.Code.fromAsset(path.join(REPOSITORY_TOP, 'lambdas/mwGetUser/dist')),
       role: getUserRole,
       environment: {
-        STAGE: props.stage,
-        COGNITO_CLIENT_ID: clientId,
+        STAGE: props.stage
       },
     });
 
