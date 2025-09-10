@@ -29,7 +29,12 @@ jobs:
       - name: Install CDK app deps
         run: |
           npm ci
-          npm run build || true
+          
+      - name: Build Lambdas
+        run: |
+          cd lambdas/mwLogin && npm install && npm run build && cd ../..
+          cd lambdas/mwGetUser && npm install && npm run build && cd ../..
+
       - name: Set STAGE
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then

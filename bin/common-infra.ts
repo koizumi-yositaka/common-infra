@@ -25,6 +25,7 @@ new GitHubActionsRoleStack(app, `GitHubActionsRoleStack`);
 new AuthLambdaStack(st, `AuthLambdaStack`, {
   stage,
   userPool: cognitoStack.userPool,
+  userPoolClient: cognitoStack.userPoolClient,
   env:{
     account:process.env.AWS_ACCOUNT,
     region:process.env.AWS_REGION

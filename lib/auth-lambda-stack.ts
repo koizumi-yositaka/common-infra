@@ -5,11 +5,12 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import path = require('path');
 import * as cognito from 'aws-cdk-lib/aws-cognito';
-const REPOSITORY_TOP = path.resolve(__dirname,"../../");
+const REPOSITORY_TOP = path.resolve(__dirname,"../");
 const PREFIX = 'lambda-auth-lambda';
 interface AuthLambdaStackProps extends cdk.StackProps {
   stage: string;
   userPool: cognito.UserPool;
+  userPoolClient: cognito.UserPoolClient;
 }
 
 
@@ -17,15 +18,24 @@ export class AuthLambdaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AuthLambdaStackProps) {
     super(scope, id, props);
 
-    const clientId = process.env.COGNITO_CLIENT_ID;
+    console.log(process.env.region);
+    const clientId = props.userPoolClient.userPoolClientId;
     if(!clientId){
       throw new Error('COGNITO_CLIENT_ID is not set');
     }
+    if(!props.userPool.userPoolArn){
+      throw new Error('COGNITO_USER_POOL_ARN is not set');
+    }
     // ロールを作成する関数
     function createLambdaRole(scope: Construct, name: string, actions: string[], userPoolArn: string) {
+      console.log("createLambdaRole", name);
+      
       const role = new iam.Role(scope, `${name}Role`, {
         assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
       });
+      role.addManagedPolicy(
+        iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")
+      );
       role.addToPolicy(new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions,
@@ -68,7 +78,6 @@ export class AuthLambdaStack extends cdk.Stack {
       memorySize: 128,
       timeout: cdk.Duration.seconds(30),
       code: lambda.Code.fromAsset(path.join(REPOSITORY_TOP, 'lambdas/mwGetUser/dist')),
-      allowPublicSubnet: true,
       role: getUserRole,
       environment: {
         STAGE: props.stage,
@@ -91,7 +100,8 @@ export class AuthLambdaStack extends cdk.Stack {
       authorizerName: `${PREFIX}-authorizer-${props.stage}`,
     });
 
-    protectedRes.addMethod('GET', new apigateway.LambdaIntegration(mwGetUserLambda), {
+    const getUser = protectedRes.addResource('getUser');
+    getUser.addMethod('GET', new apigateway.LambdaIntegration(mwGetUserLambda), {
       authorizer,
       authorizationType: apigateway.AuthorizationType.COGNITO,
     });
