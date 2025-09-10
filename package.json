@@ -6,6 +6,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "build:lambdas": "cd lambdas/mwGetUser && npm run build && cd ../mwLogin",
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk"

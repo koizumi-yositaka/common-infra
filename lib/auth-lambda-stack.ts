@@ -12,13 +12,9 @@ interface AuthLambdaStackProps extends cdk.StackProps {
   userPool: cognito.UserPool;
   userPoolClient: cognito.UserPoolClient;
 }
-
-
 export class AuthLambdaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AuthLambdaStackProps) {
     super(scope, id, props);
-
-    console.log(process.env.region);
     const clientId = props.userPoolClient.userPoolClientId;
     if(!clientId){
       throw new Error('COGNITO_CLIENT_ID is not set');
@@ -27,9 +23,7 @@ export class AuthLambdaStack extends cdk.Stack {
       throw new Error('COGNITO_USER_POOL_ARN is not set');
     }
     // ロールを作成する関数
-    function createLambdaRole(scope: Construct, name: string, actions: string[], userPoolArn: string) {
-      console.log("createLambdaRole", name);
-      
+    function createLambdaRole(scope: Construct, name: string, actions: string[], userPoolArn: string) {      
       const role = new iam.Role(scope, `${name}Role`, {
         assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
       });
@@ -81,7 +75,9 @@ export class AuthLambdaStack extends cdk.Stack {
       code: lambda.Code.fromAsset(path.join(REPOSITORY_TOP, 'lambdas/mwGetUser/dist')),
       role: getUserRole,
       environment: {
-        STAGE: props.stage
+        STAGE: props.stage,
+        COGNITO_CLIENT_ID: clientId,
+        COGNITO_USER_POOL_ID: props.userPool.userPoolId,
       },
     });
 
@@ -94,13 +90,13 @@ export class AuthLambdaStack extends cdk.Stack {
     const mwLogin = api.root.addResource('mwLogin');
     mwLogin.addMethod('POST', new apigateway.LambdaIntegration(mwLoginLambda));
 
-    const protectedRes = api.root.addResource('protected');
     const authorizer = new apigateway.CognitoUserPoolsAuthorizer(this, 'CognitoAuthorizer', {
       cognitoUserPools: [props.userPool],
       authorizerName: `${PREFIX}-authorizer-${props.stage}`,
     });
 
-    const getUser = protectedRes.addResource('getUser');
+    // getUserエンドポイントを直接ルートに追加
+    const getUser = api.root.addResource('getUser');
     getUser.addMethod('GET', new apigateway.LambdaIntegration(mwGetUserLambda), {
       authorizer,
       authorizationType: apigateway.AuthorizationType.COGNITO,
