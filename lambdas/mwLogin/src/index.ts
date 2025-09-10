@@ -5,19 +5,16 @@ import {
 import { APIGatewayProxyHandler, APIGatewayProxyEvent } from "aws-lambda";
 
 const client = new CognitoIdentityProviderClient({ region: "us-east-1" });
-
+const allowedOrigins = "http://localhost:5555,http://localhost:5500".split(",");
 // 共通のCORSヘッダー生成関数
 const getCorsHeaders = (event: APIGatewayProxyEvent) => {
-  // Originヘッダーを複数のパターンで確認
   const origin = event.headers?.origin || 
                  event.headers?.Origin || 
                  event.headers?.['origin'] || 
                  event.headers?.['Origin'];
-  
-  console.log("Detected origin:", origin);
-  
+  const allowedOrigin =origin && allowedOrigins.includes(origin) ? origin : '';
   return {
-    'Access-Control-Allow-Origin': origin || '*',
+    'Access-Control-Allow-Origin': allowedOrigin,
     'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
     'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
     'Access-Control-Allow-Credentials': 'false'
