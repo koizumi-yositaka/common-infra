@@ -6,7 +6,35 @@ import { APIGatewayProxyEvent, APIGatewayProxyHandler } from "aws-lambda";
 
 const client = new CognitoIdentityProviderClient({ region: "us-east-1" });
 
+// 共通のCORSヘッダー生成関数
+const getCorsHeaders = (event: APIGatewayProxyEvent) => {
+  // Originヘッダーを複数のパターンで確認
+  const origin = event.headers?.origin || 
+                 event.headers?.Origin || 
+                 event.headers?.['origin'] || 
+                 event.headers?.['Origin'];
+  
+  console.log("Detected origin:", origin);
+  
+  return {
+    'Access-Control-Allow-Origin': origin || '*',
+    'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+    'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+    'Access-Control-Allow-Credentials': 'false'
+  };
+};
+
 export const handler:APIGatewayProxyHandler = async (event:APIGatewayProxyEvent) => {
+  // OPTIONSリクエスト（プリフライト）の処理
+  if (event.httpMethod === 'OPTIONS') {
+    console.log("Handling OPTIONS request for getUser");
+    return {
+      statusCode: 200,
+      headers: getCorsHeaders(event),
+      body: ''
+    };
+  }
+  
   try {
     // API GatewayのCognito認証では、認証されたユーザー情報はevent.requestContext.authorizerに含まれる
     const authorizer = event.requestContext?.authorizer;
@@ -14,6 +42,7 @@ export const handler:APIGatewayProxyHandler = async (event:APIGatewayProxyEvent)
       console.error("No authorizer found");
       return {
         statusCode: 401,
+        headers: getCorsHeaders(event),
         body: JSON.stringify({ message: "Unauthorized" })
       };
     }
@@ -26,6 +55,7 @@ export const handler:APIGatewayProxyHandler = async (event:APIGatewayProxyEvent)
       console.error("No username found in claims");
       return {
         statusCode: 400,
+        headers: getCorsHeaders(event),
         body: JSON.stringify({ message: "Username not found" })
       };
     }
@@ -36,6 +66,7 @@ export const handler:APIGatewayProxyHandler = async (event:APIGatewayProxyEvent)
       console.error("COGNITO_USER_POOL_ID not set");
       return {
         statusCode: 500,
+        headers: getCorsHeaders(event),
         body: JSON.stringify({ message: "Configuration error" })
       };
     }
@@ -58,6 +89,7 @@ export const handler:APIGatewayProxyHandler = async (event:APIGatewayProxyEvent)
 
     return {
       statusCode: 200,
+      headers: getCorsHeaders(event),
       body: JSON.stringify({
         message: "User information retrieved successfully",
         user: {
@@ -78,6 +110,7 @@ export const handler:APIGatewayProxyHandler = async (event:APIGatewayProxyEvent)
     console.error("Error fetching user attributes:", error);
     return {
       statusCode: 500,
+      headers: getCorsHeaders(event),
       body: JSON.stringify({ message: "Internal Server Error" })
     };
   }

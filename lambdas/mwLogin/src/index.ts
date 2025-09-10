@@ -2,15 +2,44 @@ import {
   CognitoIdentityProviderClient,
   InitiateAuthCommand
 } from "@aws-sdk/client-cognito-identity-provider";
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { APIGatewayProxyHandler, APIGatewayProxyEvent } from "aws-lambda";
 
 const client = new CognitoIdentityProviderClient({ region: "us-east-1" });
 
-export const handler:APIGatewayProxyHandler = async (event: any) => {
+// 共通のCORSヘッダー生成関数
+const getCorsHeaders = (event: APIGatewayProxyEvent) => {
+  // Originヘッダーを複数のパターンで確認
+  const origin = event.headers?.origin || 
+                 event.headers?.Origin || 
+                 event.headers?.['origin'] || 
+                 event.headers?.['Origin'];
+  
+  console.log("Detected origin:", origin);
+  
+  return {
+    'Access-Control-Allow-Origin': origin || '*',
+    'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+    'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+    'Access-Control-Allow-Credentials': 'false'
+  };
+};
+
+export const handler:APIGatewayProxyHandler = async (event: APIGatewayProxyEvent) => {
+  // OPTIONSリクエスト（プリフライト）の処理
+  if (event.httpMethod === 'OPTIONS') {
+    console.log("Handling OPTIONS request");
+    return {
+      statusCode: 200,
+      headers: getCorsHeaders(event),
+      body: ''
+    };
+  }
+  
   if(!process.env.COGNITO_CLIENT_ID){
     console.error("Missing required environment variables");
     return {
       statusCode: 400,
+      headers: getCorsHeaders(event),
       body: JSON.stringify({ message: "Missing required environment variables" })
     }
   }
@@ -24,6 +53,7 @@ export const handler:APIGatewayProxyHandler = async (event: any) => {
       console.error("Username and password are required");
       return {
         statusCode: 400,
+        headers: getCorsHeaders(event),
         body: JSON.stringify({ message: "Username and password are required" })
       }
     }
@@ -41,6 +71,7 @@ export const handler:APIGatewayProxyHandler = async (event: any) => {
 
     return {
       statusCode: 200,
+      headers: getCorsHeaders(event),
       body: JSON.stringify({
         accessToken: response.AuthenticationResult?.AccessToken,
         idToken: response.AuthenticationResult?.IdToken,
@@ -52,6 +83,7 @@ export const handler:APIGatewayProxyHandler = async (event: any) => {
     console.error("Login error:", error);
     return {
       statusCode: 500,
+      headers: getCorsHeaders(event),
       body: JSON.stringify({ message: "Internal Server Error" })
     };
   }

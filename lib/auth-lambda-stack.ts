@@ -89,6 +89,9 @@ export class AuthLambdaStack extends cdk.Stack {
 
     const mwLogin = api.root.addResource('mwLogin');
     mwLogin.addMethod('POST', new apigateway.LambdaIntegration(mwLoginLambda));
+    
+    // OPTIONSメソッドを明示的に追加（Lambda関数で処理）
+    mwLogin.addMethod('OPTIONS', new apigateway.LambdaIntegration(mwLoginLambda));
 
     const authorizer = new apigateway.CognitoUserPoolsAuthorizer(this, 'CognitoAuthorizer', {
       cognitoUserPools: [props.userPool],
@@ -101,6 +104,9 @@ export class AuthLambdaStack extends cdk.Stack {
       authorizer,
       authorizationType: apigateway.AuthorizationType.COGNITO,
     });
+    
+    // OPTIONSメソッドを明示的に追加（Lambda関数で処理）
+    getUser.addMethod('OPTIONS', new apigateway.LambdaIntegration(mwGetUserLambda));
 
     new cdk.CfnOutput(this, `auth-lambda-url-${props.stage}`, {
       value: api.url,
