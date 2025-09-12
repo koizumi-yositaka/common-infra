@@ -34,6 +34,7 @@ jobs:
         run: |
           cd lambdas/mwLogin && npm install && npm run build && cd ../..
           cd lambdas/mwGetUser && npm install && npm run build && cd ../..
+          cd lambdas/invalidateCloudFrontCache && npm install && npm run build && cd ../..
 
       - name: Set STAGE
         run: |

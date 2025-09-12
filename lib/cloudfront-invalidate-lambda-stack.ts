@@ -5,7 +5,7 @@ import * as path from 'path';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 
 interface CloudFrontInvalidateLambdaStackProps extends cdk.StackProps {
-  stage: string;
+
 }
 
 const PREFIX = 'react-distribute-bucket-ky';
@@ -18,7 +18,7 @@ export class CloudFrontInvalidateLambdaStack extends cdk.Stack {
     super(scope, id, props);
 
     this.invalidateLambda = new NodejsFunction(this, `${PREFIX}-invalidate-lambda`, {
-      functionName: `${PREFIX}-invalidate-lambda-${props.stage}`,
+      functionName: `${PREFIX}-invalidate-lambda`,
       entry: path.join(REPOSITORY_TOP, "lambdas/invalidateCloudFrontCache/src/index.ts"),
       handler: "handler",
       runtime: lambda.Runtime.NODEJS_22_X,

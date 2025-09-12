@@ -25,7 +25,6 @@ const cognitoStack = new CognitoStack(st, `CognitoStack`, {
 new GitHubActionsRoleStack(app, `GitHubActionsRoleStack`); 
 // CloudFrontキャッシュ無効化用Lambda関数スタック
 const cloudFrontInvalidateLambdaStack = new CloudFrontInvalidateLambdaStack(app, `CloudFrontInvalidateLambdaStack`, {
-  stage,
   env:{
     account:process.env.AWS_ACCOUNT,
     region:process.env.AWS_REGION
