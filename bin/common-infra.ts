@@ -5,7 +5,6 @@ import { GitHubActionsRoleStack } from '../lib/githubActions-role-stack';
 import 'dotenv/config'
 import { AuthLambdaStack } from '../lib/auth-lambda-stack';
 import { ReactDistributeBucket } from '../lib/react-distribute-bucket';
-import { CloudFrontInvalidateLambdaStack } from '../lib/cloudfront-invalidate-lambda-stack';
 
 const stage = process.env.STAGE || 'dev';
 const app = new cdk.App();
@@ -24,14 +23,6 @@ const cognitoStack = new CognitoStack(st, `CognitoStack`, {
 
 new GitHubActionsRoleStack(app, `GitHubActionsRoleStack`); 
 
-// CloudFrontキャッシュ無効化用Lambda関数スタック（Stage内に移動）
-const cloudFrontInvalidateLambdaStack = new CloudFrontInvalidateLambdaStack(st, `CloudFrontInvalidateLambdaStack`, {
-  env:{
-    account:process.env.AWS_ACCOUNT,
-    region:process.env.AWS_REGION
-  }
-});
-
 new AuthLambdaStack(st, `AuthLambdaStack`, {
   stage,
   userPool: cognitoStack.userPool,
@@ -45,7 +36,6 @@ new AuthLambdaStack(st, `AuthLambdaStack`, {
 new ReactDistributeBucket(st, `ReactDistributeBucket`, {
   stage,
   appliName: 'my-app', // アプリケーション名を指定
-  invalidateLambda: cloudFrontInvalidateLambdaStack.invalidateLambda,
   env:{
     account:process.env.AWS_ACCOUNT,
     region:process.env.AWS_REGION
