@@ -3,7 +3,7 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 
 const GITHUB_USERNAME = "koizumi-yositaka"
-const REPOSITORY_NAME_LIST = ["manage-work-lambda","common-infra"]
+const REPOSITORY_NAME_LIST = ["manage-work-lambda","common-infra","quiz-maker-lambda"]
 
 export class GitHubActionsRoleStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
