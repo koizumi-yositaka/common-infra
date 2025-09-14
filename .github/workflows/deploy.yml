@@ -80,8 +80,14 @@ jobs:
           URL1=$(jq -r '.devReactDistributeBucket.HostingURL' cdk-outputs.json)
           URL2=$(jq -r '.devManageWorkReactDistributeBucket.HostingURL' cdk-outputs.json)
 
+          DISTRIBUTION_ID1=$(jq -r '.devReactDistributeBucket.DistributionID' cdk-outputs.json)
+          DISTRIBUTION_ID2=$(jq -r '.devManageWorkReactDistributeBucket.DistributionID' cdk-outputs.json)
+
           echo "ReactDistribute: $URL1"
           echo "ManageWorkReactDistribute: $URL2"
+
+          echo "ReactDistribute DistributionID: $DISTRIBUTION_ID1"
+          echo "ManageWorkReactDistribute DistributionID: $DISTRIBUTION_ID2"
 
           curl -H 'Content-Type: application/json' \
                -d "{
@@ -94,7 +100,9 @@ jobs:
                        \"activityTitle\": \"ステージ: $STAGE\",
                        \"facts\": [
                          {\"name\": \"React Distribute\", \"value\": \"$URL1\"},
-                         {\"name\": \"Manage Work React Distribute\", \"value\": \"$URL2\"}
+                         {\"name\": \"React Distribute DistributionID\", \"value\": \"$DISTRIBUTION_ID1\"},
+                         {\"name\": \"Manage Work React Distribute\", \"value\": \"$URL2\"},
+                         {\"name\": \"Manage Work React Distribute DistributionID\", \"value\": \"$DISTRIBUTION_ID2\"}
                        ],
                        \"markdown\": true
                      }]
