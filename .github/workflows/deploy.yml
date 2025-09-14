@@ -95,4 +95,3 @@ jobs:
                      }]
                    }" \
                ${{ secrets.TEAMS_WEBHOOK_URL }}
-https://esccocojp.webhook.office.com/webhookb2/76229d1b-6632-4409-99c5-394bc487eaac@841a7ac6-1227-4e4b-ba56-f403ec0e8fe7/IncomingWebhook/b8f4a5bae50b455ba61c360915fbc9e2/3ea3c1dd-382e-4d0f-8acb-b8e3d5dbbfe4/V2oznmaZ-7OuoJNCEE6JTVL24ERZtqa40M4sybBy9WA4Q1
