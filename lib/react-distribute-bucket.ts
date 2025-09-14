@@ -39,6 +39,12 @@ export class ReactDistributeBucket extends cdk.Stack {
         defaultRootObject: 'index.html',
         errorResponses: [
           {
+            httpStatus: 403, // S3 が権限エラーで返す場合
+            responseHttpStatus: 200,
+            responsePagePath: '/index.html',
+            ttl: cdk.Duration.seconds(0),
+          },
+          {
             httpStatus: 404,
             responseHttpStatus: 200,
             responsePagePath: '/index.html',
