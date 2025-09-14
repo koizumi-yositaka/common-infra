@@ -53,6 +53,9 @@ export class ReactDistributeBucket extends cdk.Stack {
         ],
     });
 
+    new cdk.CfnOutput(this, 'DistributionID', {
+      value: distribution.distributionId
+    });
     new cdk.CfnOutput(this, 'Hosting URL', {
       value: 'https://' + distribution.distributionDomainName
     });
