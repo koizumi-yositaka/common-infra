@@ -55,7 +55,7 @@ export class ReactDistributeBucket extends cdk.Stack {
 
     // CloudFrontキャッシュ無効化用Lambda関数をこのスタック内で作成
     const invalidateLambda = new NodejsFunction(this, `${PREFIX}-invalidate-lambda`, {
-      functionName: `${PREFIX}-invalidate-lambda`,
+      functionName: `${PREFIX}-invalidate-lambda-${props.stage}`,
       entry: path.join(REPOSITORY_TOP, "lambdas/invalidateCloudFrontCache/src/index.ts"),
       handler: "handler",
       runtime: lambda.Runtime.NODEJS_22_X,
