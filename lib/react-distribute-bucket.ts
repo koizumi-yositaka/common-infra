@@ -53,29 +53,8 @@ export class ReactDistributeBucket extends cdk.Stack {
         ],
     });
 
-    // CloudFrontキャッシュ無効化用Lambda関数をこのスタック内で作成
-    const invalidateLambda = new NodejsFunction(this, `${PREFIX}-invalidate-lambda`, {
-      functionName: `${PREFIX}-invalidate-lambda-${props.stage}`,
-      entry: path.join(REPOSITORY_TOP, "lambdas/invalidateCloudFrontCache/src/index.ts"),
-      handler: "handler",
-      runtime: lambda.Runtime.NODEJS_22_X,
-      memorySize: 128,
-      timeout: cdk.Duration.seconds(30),
-      environment: {
-        DISTRIBUTION_ID: distribution.distributionId,
-      },
-    });
-
-    distribution.grantCreateInvalidation(invalidateLambda);
-    siteBucket.addEventNotification(s3.EventType.OBJECT_CREATED, new s3n.LambdaDestination(invalidateLambda)); 
-
     new cdk.CfnOutput(this, 'Hosting URL', {
       value: 'https://' + distribution.distributionDomainName
-    });
-
-    new cdk.CfnOutput(this, 'InvalidateLambdaArn', {
-      value: invalidateLambda.functionArn,
-      description: 'CloudFront Invalidate Lambda Function ARN',
     });
   }
 }
