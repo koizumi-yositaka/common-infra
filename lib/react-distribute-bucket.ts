@@ -37,6 +37,14 @@ export class ReactDistributeBucket extends cdk.Stack {
             origin: origins.S3BucketOrigin.withOriginAccessControl(siteBucket)
         },
         defaultRootObject: 'index.html',
+        errorResponses: [
+          {
+            httpStatus: 404,
+            responseHttpStatus: 200,
+            responsePagePath: '/index.html',
+            ttl: cdk.Duration.seconds(0),
+          },
+        ],
     });
 
     // CloudFrontキャッシュ無効化用Lambda関数をこのスタック内で作成
