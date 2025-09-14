@@ -25,7 +25,7 @@ export class ReactDistributeBucket extends cdk.Stack {
     const siteBucket = new s3.Bucket(this,`${PREFIX}-cloudfront-bucket-${props.appliName}`,{
         websiteIndexDocument: 'index.html',
         websiteErrorDocument: 'index.html',
-        bucketName: `${PREFIX}-cloudfront-bucket-${props.appliName}`,
+        bucketName: `${PREFIX}-cloudfront-bucket-${props.appliName}-${props.stage}`,
         removalPolicy: cdk.RemovalPolicy.DESTROY,
         autoDeleteObjects: true,
         publicReadAccess: false,
