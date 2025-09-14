@@ -41,3 +41,12 @@ new ReactDistributeBucket(app, `${stage}ReactDistributeBucket`, {
     region:process.env.AWS_REGION
   }
 });
+
+new ReactDistributeBucket(app, `${stage}ManageWorkReactDistributeBucket`, {
+  stage,
+  appliName: 'manage-work-react', // アプリケーション名を指定
+  env:{
+    account:process.env.AWS_ACCOUNT,
+    region:process.env.AWS_REGION
+  }
+});
