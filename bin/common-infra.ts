@@ -35,7 +35,7 @@ new AuthLambdaStack(st, `AuthLambdaStack`, {
 
 new ReactDistributeBucket(st, `ReactDistributeBucket`, {
   stage,
-  appliName: 'my-app', // アプリケーション名を指定
+  appliName: 'quiz-distributor', // アプリケーション名を指定
   env:{
     account:process.env.AWS_ACCOUNT,
     region:process.env.AWS_REGION
