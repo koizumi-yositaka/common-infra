@@ -77,8 +77,12 @@ jobs:
       - name: Notify Teams
         if: github.event_name == 'push'
         run: |
-          CLOUDFRONT_URL=$(jq -r '.[].CloudFrontURL' cdk-outputs.json)
-          echo "CloudFront URL is $CLOUDFRONT_URL"
+          URL1=$(jq -r '.devReactDistributeBucket.HostingURL' cdk-outputs.json)
+          URL2=$(jq -r '.devManageWorkReactDistributeBucket.HostingURL' cdk-outputs.json)
+
+          echo "ReactDistribute: $URL1"
+          echo "ManageWorkReactDistribute: $URL2"
+
           curl -H 'Content-Type: application/json' \
                -d "{
                      \"@type\": \"MessageCard\",
@@ -89,7 +93,8 @@ jobs:
                      \"sections\": [{
                        \"activityTitle\": \"ステージ: $STAGE\",
                        \"facts\": [
-                         {\"name\": \"CloudFront URL\", \"value\": \"https://$CLOUDFRONT_URL\"}
+                         {\"name\": \"React Distribute\", \"value\": \"$URL1\"},
+                         {\"name\": \"Manage Work React Distribute\", \"value\": \"$URL2\"}
                        ],
                        \"markdown\": true
                      }]
