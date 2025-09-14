@@ -14,7 +14,7 @@ interface ReactDistributeBucketProps extends cdk.StackProps {
   appliName: string;
 }
 
-const PREFIX = 'react-distribute-bucket-ky';
+const PREFIX = 'distribute-bucket-ky';
 const REPOSITORY_TOP = path.resolve(__dirname, "../");
 
 export class ReactDistributeBucket extends cdk.Stack {
