@@ -8,12 +8,12 @@ import { ReactDistributeBucket } from '../lib/react-distribute-bucket';
 
 const stage = process.env.STAGE || 'dev';
 const app = new cdk.App();
-const st = new cdk.Stage(app, stage);
 
 if(!process.env.AWS_ACCOUNT || !process.env.AWS_REGION){
   throw new Error("環境変数が足りません")
 }
-const cognitoStack = new CognitoStack(st, `CognitoStack`, {
+
+const cognitoStack = new CognitoStack(app, `${stage}CognitoStack`, {
   stage,
   env:{
     account:process.env.AWS_ACCOUNT,
@@ -23,7 +23,7 @@ const cognitoStack = new CognitoStack(st, `CognitoStack`, {
 
 new GitHubActionsRoleStack(app, `GitHubActionsRoleStack`); 
 
-new AuthLambdaStack(st, `AuthLambdaStack`, {
+new AuthLambdaStack(app, `${stage}AuthLambdaStack`, {
   stage,
   userPool: cognitoStack.userPool,
   userPoolClient: cognitoStack.userPoolClient,
@@ -33,7 +33,7 @@ new AuthLambdaStack(st, `AuthLambdaStack`, {
   }
 });
 
-new ReactDistributeBucket(st, `ReactDistributeBucket`, {
+new ReactDistributeBucket(app, `${stage}ReactDistributeBucket`, {
   stage,
   appliName: 'quiz-distributor', // アプリケーション名を指定
   env:{

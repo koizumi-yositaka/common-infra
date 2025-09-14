@@ -23,3 +23,10 @@
    GitHubActionsRoleStack.RoleArn = XXX
 
 # Cognito の deploy
+
+
+
+cdk bootstrap \
+  --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess \
+  --trust arn:aws:iam::260337063361:role/GitHubActionsRole \
+  aws://260337063361/us-east-1
