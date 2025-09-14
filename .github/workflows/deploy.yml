@@ -65,6 +65,34 @@ jobs:
           npx aws-cdk diff --all || true
       - name: CDK Deploy
         if: github.event_name == 'push'
+        id: deploy
         run: |
           echo "STAGE: $STAGE"
-          npx aws-cdk deploy --all --require-approval never
+          npx aws-cdk deploy --all --require-approval never --outputs-file cdk-outputs.json
+
+      - name: Show CDK Outputs
+        if: github.event_name == 'push'
+        run: cat cdk-outputs.json
+
+      - name: Notify Teams
+        if: github.event_name == 'push'
+        run: |
+          CLOUDFRONT_URL=$(jq -r '.[].CloudFrontURL' cdk-outputs.json)
+          echo "CloudFront URL is $CLOUDFRONT_URL"
+          curl -H 'Content-Type: application/json' \
+               -d "{
+                     \"@type\": \"MessageCard\",
+                     \"@context\": \"https://schema.org/extensions\",
+                     \"summary\": \"CDK Deploy Result\",
+                     \"themeColor\": \"0076D7\",
+                     \"title\": \"✅ CDK デプロイ完了\",
+                     \"sections\": [{
+                       \"activityTitle\": \"ステージ: $STAGE\",
+                       \"facts\": [
+                         {\"name\": \"CloudFront URL\", \"value\": \"https://$CLOUDFRONT_URL\"}
+                       ],
+                       \"markdown\": true
+                     }]
+                   }" \
+               ${{ secrets.TEAMS_WEBHOOK_URL }}
+https://esccocojp.webhook.office.com/webhookb2/76229d1b-6632-4409-99c5-394bc487eaac@841a7ac6-1227-4e4b-ba56-f403ec0e8fe7/IncomingWebhook/b8f4a5bae50b455ba61c360915fbc9e2/3ea3c1dd-382e-4d0f-8acb-b8e3d5dbbfe4/V2oznmaZ-7OuoJNCEE6JTVL24ERZtqa40M4sybBy9WA4Q1
