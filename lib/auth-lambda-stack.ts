@@ -64,6 +64,7 @@ export class AuthLambdaStack extends cdk.Stack {
       environment: {
         STAGE: props.stage,
         COGNITO_CLIENT_ID: clientId,
+        ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS || '',
       },
     });
     const mwGetUserLambda = new lambda.Function(this, 'MwGetUserLambda', {
@@ -78,6 +79,7 @@ export class AuthLambdaStack extends cdk.Stack {
         STAGE: props.stage,
         COGNITO_CLIENT_ID: clientId,
         COGNITO_USER_POOL_ID: props.userPool.userPoolId,
+        ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS || '',
       },
     });
 

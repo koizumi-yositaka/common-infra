@@ -5,7 +5,7 @@ import {
 import { APIGatewayProxyHandler, APIGatewayProxyEvent } from "aws-lambda";
 
 const client = new CognitoIdentityProviderClient({ region: "us-east-1" });
-const allowedOrigins = "http://localhost:5555,http://localhost:5500".split(",");
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [];
 // 共通のCORSヘッダー生成関数
 const getCorsHeaders = (event: APIGatewayProxyEvent) => {
   const origin = event.headers?.origin || 
