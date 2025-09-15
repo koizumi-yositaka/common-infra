@@ -19,6 +19,7 @@ jobs:
     env:
       AWS_ACCOUNT: 260337063361
       AWS_REGION: us-east-1
+      ALLOWED_ORIGINS: http://localhost:5555,http://localhost:5500,https://d3bgyx72paaick.cloudfront.net,https://dj1c2up9ql1s6.cloudfront.net
     steps:
       - uses: actions/checkout@v3
 
