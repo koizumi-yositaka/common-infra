@@ -42,6 +42,7 @@ export class GitHubActionsRoleStack extends cdk.Stack {
           'ssm:*',
           'ec2:*',
           'cloudfront:*',
+          'ecr:*',
         ],
         resources: ['*'],
       })
