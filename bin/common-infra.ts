@@ -5,6 +5,7 @@ import { GitHubActionsRoleStack } from '../lib/githubActions-role-stack';
 import 'dotenv/config'
 import { AuthLambdaStack } from '../lib/auth-lambda-stack';
 import { ReactDistributeBucket } from '../lib/react-distribute-bucket';
+import { GenerateQuizAiEcrStack } from '../lib/generate-quiz-ai-ecr';
 
 const stage = process.env.STAGE || 'dev';
 const app = new cdk.App();
@@ -36,6 +37,14 @@ new AuthLambdaStack(app, `${stage}AuthLambdaStack`, {
 new ReactDistributeBucket(app, `${stage}ReactDistributeBucket`, {
   stage,
   appliName: 'quiz-distributor', // アプリケーション名を指定
+  env:{
+    account:process.env.AWS_ACCOUNT,
+    region:process.env.AWS_REGION
+  }
+});
+
+new GenerateQuizAiEcrStack(app, `${stage}GenerateQuizAiEcrStack`, {
+  stage,
   env:{
     account:process.env.AWS_ACCOUNT,
     region:process.env.AWS_REGION
