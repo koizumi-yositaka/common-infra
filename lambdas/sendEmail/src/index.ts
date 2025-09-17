@@ -7,18 +7,6 @@ const getCorsHeaders = (event: APIGatewayProxyEvent) => {
                  event.headers?.Origin || 
                  event.headers?.['origin'] || 
                  event.headers?.['Origin'];
-  
-  // For OPTIONS requests, always return CORS headers
-  if (event.httpMethod === 'OPTIONS') {
-    return {
-      'Access-Control-Allow-Origin': origin || '*',
-      'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
-      'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-      'Access-Control-Allow-Credentials': 'false'
-    };
-  }
-  
-  // For actual requests, check if origin is allowed
   const allowedOrigin = origin && allowedOrigins.includes(origin) ? origin : '';
   return {
     'Access-Control-Allow-Origin': allowedOrigin,
