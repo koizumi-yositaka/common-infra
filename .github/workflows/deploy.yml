@@ -20,6 +20,7 @@ jobs:
       AWS_ACCOUNT: 260337063361
       AWS_REGION: us-east-1
       DOMAIN: yositaka-test.com
+      SES_SOURCE: yositaka.koizumi@escco.co.jp
       ALLOWED_ORIGINS: http://localhost:5555,http://localhost:5500,https://d3bgyx72paaick.cloudfront.net,https://dj1c2up9ql1s6.cloudfront.net,https://quiz-distributor.dev.yositaka-test.com,https://manage-work.dev.yositaka-test.com
     steps:
       - uses: actions/checkout@v3

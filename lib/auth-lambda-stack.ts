@@ -52,6 +52,10 @@ export class AuthLambdaStack extends cdk.Stack {
       'cognito-idp:AdminGetUser',
     ], props.userPool.userPoolArn);
 
+    const sendEmailRole = createLambdaRole(this, 'SendEmailLambda', [
+      'ses:SendEmail',
+    ], props.userPool.userPoolArn);
+
     // lambdas/test を指す
     const mwLoginLambda = new lambda.Function(this, 'MwLoginLambda', {
       runtime: lambda.Runtime.NODEJS_22_X,
@@ -82,7 +86,20 @@ export class AuthLambdaStack extends cdk.Stack {
         ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS || '',
       },
     });
-
+    const sendEmailLambda = new lambda.Function(this, 'SendEmailLambda', {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      handler: 'index.handler',
+      functionName: `${PREFIX}-send-email-${props.stage}`,
+      memorySize: 128,
+      timeout: cdk.Duration.seconds(30),
+      code: lambda.Code.fromAsset(path.join(REPOSITORY_TOP, 'lambdas/sendEmail/dist')),
+      role: sendEmailRole,
+      environment: {
+        STAGE: props.stage,
+        ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS || '',
+        SES_SOURCE: process.env.SES_SOURCE || '',
+      },
+    });
     const api = new apigateway.RestApi(this, `auth-lambda-${props.stage}`, {
       deployOptions: {
         stageName: props.stage,
@@ -91,7 +108,6 @@ export class AuthLambdaStack extends cdk.Stack {
 
     const mwLogin = api.root.addResource('mwLogin');
     mwLogin.addMethod('POST', new apigateway.LambdaIntegration(mwLoginLambda));
-    
     // OPTIONSメソッドを明示的に追加（Lambda関数で処理）
     mwLogin.addMethod('OPTIONS', new apigateway.LambdaIntegration(mwLoginLambda));
 
@@ -106,9 +122,18 @@ export class AuthLambdaStack extends cdk.Stack {
       authorizer,
       authorizationType: apigateway.AuthorizationType.COGNITO,
     });
-    
     // OPTIONSメソッドを明示的に追加（Lambda関数で処理）
     getUser.addMethod('OPTIONS', new apigateway.LambdaIntegration(mwGetUserLambda));
+
+    const sendEmail = api.root.addResource('sendEmail');
+    sendEmail.addMethod('POST', new apigateway.LambdaIntegration(sendEmailLambda),{
+      authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
+    // OPTIONSメソッドを明示的に追加（Lambda関数で処理）
+    sendEmail.addMethod('OPTIONS', new apigateway.LambdaIntegration(sendEmailLambda));
+
+
 
     new cdk.CfnOutput(this, `auth-lambda-url-${props.stage}`, {
       value: api.url,
