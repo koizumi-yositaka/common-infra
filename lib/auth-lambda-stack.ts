@@ -53,8 +53,15 @@ export class AuthLambdaStack extends cdk.Stack {
     ], props.userPool.userPoolArn);
 
     const sendEmailRole = createLambdaRole(this, 'SendEmailLambda', [
-      'ses:SendEmail',
+      'cognito-idp:AdminGetUser',
     ], props.userPool.userPoolArn);
+    
+    // Add SES permissions separately since they need different resource ARNs
+    sendEmailRole.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ['ses:SendEmail'],
+      resources: ['*'], // SES SendEmail requires * resource for all verified identities
+    }));
 
     // lambdas/test を指す
     const mwLoginLambda = new lambda.Function(this, 'MwLoginLambda', {
