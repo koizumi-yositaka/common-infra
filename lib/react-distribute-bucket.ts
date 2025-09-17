@@ -3,15 +3,17 @@ import { Construct } from 'constructs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
-import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
 import * as path from 'path';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+
+import * as route53 from 'aws-cdk-lib/aws-route53';
+import * as acm from 'aws-cdk-lib/aws-certificatemanager';
+import * as targets from 'aws-cdk-lib/aws-route53-targets';
 
 
 interface ReactDistributeBucketProps extends cdk.StackProps {
   stage: string;
   appliName: string;
+  subDomain: string;
 }
 
 const PREFIX = 'distribute-bucket-ky';
@@ -21,7 +23,22 @@ export class ReactDistributeBucket extends cdk.Stack {
 
   constructor(scope: Construct, id: string, props: ReactDistributeBucketProps) {
     super(scope, id, props);
-    
+    const domain = process.env.DOMAIN;
+    if(!domain){
+      throw new Error('DOMAIN is not set');
+    }
+    const subDomain = props.subDomain;
+    const domainName = `${subDomain}${props.appliName}.${props.stage}.${domain}`;
+
+    console.log(domainName);
+
+    const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
+      domainName: domain,
+    });
+    const certificate = new acm.Certificate(this, 'Certificate', {
+      domainName: domainName,
+      validation: acm.CertificateValidation.fromDns(hostedZone),
+    });
     const siteBucket = new s3.Bucket(this,`${PREFIX}-cloudfront-bucket-${props.appliName}`,{
         websiteIndexDocument: 'index.html',
         websiteErrorDocument: 'index.html',
@@ -37,9 +54,10 @@ export class ReactDistributeBucket extends cdk.Stack {
             origin: origins.S3BucketOrigin.withOriginAccessControl(siteBucket)
         },
         defaultRootObject: 'index.html',
+        certificate: certificate,
         errorResponses: [
           {
-            httpStatus: 403, // S3 が権限エラーで返す場合
+            httpStatus: 403,
             responseHttpStatus: 200,
             responsePagePath: '/index.html',
             ttl: cdk.Duration.seconds(0),
@@ -52,6 +70,13 @@ export class ReactDistributeBucket extends cdk.Stack {
           },
         ],
     });
+
+    new route53.ARecord(this, 'ARecord', {
+      zone: hostedZone,
+      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
+      recordName: domainName,
+    });
+    
 
     new cdk.CfnOutput(this, 'DistributionID', {
       value: distribution.distributionId

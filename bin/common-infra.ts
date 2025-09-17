@@ -37,6 +37,7 @@ new AuthLambdaStack(app, `${stage}AuthLambdaStack`, {
 new ReactDistributeBucket(app, `${stage}ReactDistributeBucket`, {
   stage,
   appliName: 'quiz-distributor', // アプリケーション名を指定
+  subDomain: 'quiz-distributor',
   env:{
     account:process.env.AWS_ACCOUNT,
     region:process.env.AWS_REGION
@@ -54,6 +55,7 @@ new GenerateQuizAiEcrStack(app, `${stage}GenerateQuizAiEcrStack`, {
 new ReactDistributeBucket(app, `${stage}ManageWorkReactDistributeBucket`, {
   stage,
   appliName: 'manage-work-react', // アプリケーション名を指定
+  subDomain: 'manage-work',
   env:{
     account:process.env.AWS_ACCOUNT,
     region:process.env.AWS_REGION
