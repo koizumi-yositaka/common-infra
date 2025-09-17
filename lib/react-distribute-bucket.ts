@@ -54,6 +54,7 @@ export class ReactDistributeBucket extends cdk.Stack {
             origin: origins.S3BucketOrigin.withOriginAccessControl(siteBucket)
         },
         defaultRootObject: 'index.html',
+        domainNames: [domainName],
         certificate: certificate,
         errorResponses: [
           {
