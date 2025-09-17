@@ -28,7 +28,7 @@ export class ReactDistributeBucket extends cdk.Stack {
       throw new Error('DOMAIN is not set');
     }
     const subDomain = props.subDomain;
-    const domainName = `${subDomain}${props.appliName}.${props.stage}.${domain}`;
+    const domainName = `${subDomain}.${props.stage}.${domain}`;
 
     console.log(domainName);
 
